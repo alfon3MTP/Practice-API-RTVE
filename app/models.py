@@ -1,49 +1,82 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, AnyUrl, field_validator
+
 from datetime import datetime
+from typing import List, Optional
 
 from sqlmodel import SQLModel, Field, Relationship
-from typing import List, Optional
-from pydantic import HttpUrl
 
 
-class Genre(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+
+
+## Pydantic Model (This is not necessary, it's just to practice)
+
+## RTVE API Response
+
+class TVPubState(BaseModel):
+    code: Optional[str] = None
+    description: Optional[str] = None
+    
+class TVChannel(BaseModel):
+    title: Optional[str] = None
+    htmlUrl: Optional[AnyUrl] = None
+    uid: Optional[str] = None
+    
+class TVGenres(BaseModel):
+    generoInf: Optional[str] = None
+    generoInfUid: Optional[str] = None
+    generoId: Optional[str] = None
+
+class TVProgram(BaseModel):
+    # Basic info
+    htmlUrl: AnyUrl
+    uid: str
     name: str
-
-    programs: List["Program"] = Relationship(back_populates="genre")
-
-
-class Channel(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    title: str
-    permalink: str
-    html_url: HttpUrl
-
-    programs: List["Program"] = Relationship(back_populates="channel")
-
-
-class PublicationState(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    code: str
-    description: str
-
-    programs: List["Program"] = Relationship(back_populates="pub_state")
-
-
-class Program(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    name: str
+    language: Optional[str] = None
     description: Optional[str] = None
     emission: Optional[str] = None
-    publication_date: Optional[str] = None
-    logo_url: Optional[HttpUrl] = None
+    publicationDate: Optional[datetime] = None
+    
+    # Media
+    orden: Optional[int] = None
+    imageSEO: Optional[str] = None
+    logo: Optional[str] = None
+    thumbnail: Optional[str] = None
+    
+    # Age Rating
+    ageRangeUid: Optional[str] = None
+    ageRange: Optional[str] = None
+    
+    # Program genre and completion
+    contentType: Optional[str] = None
+    sgce: Optional[str] = None
+    programType: Optional[str] = None
+    programTypeId: Optional[int] = None
+    isComplete: Optional[bool] = None
+    numSeasons: Optional[int] = None
+    
+    # Direction
+    director: Optional[str] = None #"Jero Rodríguez",
+    producedBy: Optional[str] = None #"Isabel Blesa | Josep Parés",
+    showMan: Optional[str] = None #"Maika Makovski",
+    casting: Optional[str] = None #null,
+    technicalTeam: Optional[str] = None #"Xavier Lomba hay una parte | Juan Caballero | Alfredo Carracedo | Guillem Nualart",
+    
+    idWiki: Optional[AnyUrl] = None
+    
+    pubState: TVPubState
+    channel: TVChannel
+    generos: List[TVGenres]
+    
+    @field_validator('publicationDate', mode="before")
+    def validate_publication_date(cls, v):
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, '%d-%m-%Y %H:%M:%S')
+            except ValueError:
+                raise ValueError('Invalid date format')
+        return v
 
-    channel_id: int = Field(foreign_key="channel.id")
-    genre_id: int = Field(foreign_key="genre.id")
-    pub_state_id: int = Field(foreign_key="publicationstate.id")
+class TVPage(BaseModel):
+    items: List[TVProgram]
 
-    channel: Channel = Relationship(back_populates="programs")
-    genre: Genre = Relationship(back_populates="programs")
-    pub_state: PublicationState = Relationship(back_populates="programs")
 
