@@ -1,72 +1,90 @@
-from pydantic import BaseModel, AnyUrl, field_validator
-
 from datetime import datetime
 from typing import List, Optional
-
 from sqlmodel import SQLModel, Field, Relationship
-
-
-
+from pydantic import field_validator
+from sqlalchemy import UniqueConstraint
 
 ## Pydantic Model (This is not necessary, it's just to practice)
 
 ## RTVE API Response
 
-class TVPubState(BaseModel):
+class TVPubState(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     code: Optional[str] = None
     description: Optional[str] = None
-    
-class TVChannel(BaseModel):
+
+class TVChannel(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     title: Optional[str] = None
-    htmlUrl: Optional[AnyUrl] = None
+    htmlUrl: Optional[str] = None
     uid: Optional[str] = None
-    
-class TVGenres(BaseModel):
+
+    programs: List["TVProgram"] = Relationship(back_populates="channel")
+
+class TVProgramGenreLink(SQLModel, table=True):
+    program_id: Optional[int] = Field(default=None, foreign_key="tvprogram.id", primary_key=True)
+    genre_id: Optional[int] = Field(default=None, foreign_key="tvgenres.id", primary_key=True)
+
+
+class TVGenres(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     generoInf: Optional[str] = None
     generoInfUid: Optional[str] = None
     generoId: Optional[str] = None
 
-class TVProgram(BaseModel):
-    # Basic info
-    htmlUrl: AnyUrl
+    programs: List["TVProgram"] = Relationship(
+        back_populates="genres",
+        link_model=TVProgramGenreLink  # Corrected by removing quotes
+    )
+
+class TVProgram(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    htmlUrl: str
     uid: str
     name: str
     language: Optional[str] = None
     description: Optional[str] = None
     emission: Optional[str] = None
     publicationDate: Optional[datetime] = None
-    
-    # Media
+
+    # Media details
     orden: Optional[int] = None
     imageSEO: Optional[str] = None
     logo: Optional[str] = None
     thumbnail: Optional[str] = None
-    
+
     # Age Rating
     ageRangeUid: Optional[str] = None
     ageRange: Optional[str] = None
-    
-    # Program genre and completion
+
+    # Program genre and completion details
     contentType: Optional[str] = None
     sgce: Optional[str] = None
     programType: Optional[str] = None
     programTypeId: Optional[int] = None
     isComplete: Optional[bool] = None
     numSeasons: Optional[int] = None
-    
-    # Direction
-    director: Optional[str] = None #"Jero Rodríguez",
-    producedBy: Optional[str] = None #"Isabel Blesa | Josep Parés",
-    showMan: Optional[str] = None #"Maika Makovski",
-    casting: Optional[str] = None #null,
-    technicalTeam: Optional[str] = None #"Xavier Lomba hay una parte | Juan Caballero | Alfredo Carracedo | Guillem Nualart",
-    
-    idWiki: Optional[AnyUrl] = None
-    
-    pubState: TVPubState
-    channel: TVChannel
-    generos: List[TVGenres]
-    
+
+    # Team details
+    director: Optional[str] = None
+    producedBy: Optional[str] = None
+    showMan: Optional[str] = None
+    casting: Optional[str] = None
+    technicalTeam: Optional[str] = None
+
+    idWiki: Optional[str] = None
+
+    # Foreign Keys and Relationships
+    pubState_id: Optional[int] = Field(default=None, foreign_key="tvpubstate.id")
+    channel_id: Optional[int] = Field(default=None, foreign_key="tvchannel.id")
+
+    pubState: Optional[TVPubState] = Relationship()
+    channel: Optional[TVChannel] = Relationship(back_populates="programs")
+    genres: Optional[List[TVGenres]] = Relationship(
+        back_populates="programs",
+        link_model=TVProgramGenreLink,
+    )
+
     @field_validator('publicationDate', mode="before")
     def validate_publication_date(cls, v):
         if isinstance(v, str):
@@ -76,7 +94,6 @@ class TVProgram(BaseModel):
                 raise ValueError('Invalid date format')
         return v
 
-class TVPage(BaseModel):
-    items: List[TVProgram]
+
 
 
