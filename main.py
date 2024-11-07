@@ -1,8 +1,24 @@
-from app.services.fetch_rtve_data import fetch_programs
-from app.db import init_db, engine
+import uvicorn
+from fastapi import FastAPI
 
-init_db()
+# Import Routers
+from app.routers import monitoring, rtve
 
-for i in range(80):
-    # fetch_programs(MAX_PAGE_SIZE, i)
-    fetch_programs(60, i, engine)
+
+app = FastAPI(
+    title="AGGREGATOR",
+    description="Prueb ade Routers",
+)
+
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello World!"}
+
+
+app.include_router(monitoring.router)
+app.include_router(rtve.router)
+
+
+if __name__ == '__main__':
+    uvicorn.run('main:app', host="127.0.0.1", port=8000, reload=True)
