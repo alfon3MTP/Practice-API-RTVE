@@ -111,8 +111,11 @@ def fetch_programs(size: int, page: int, engine):
                 # Add the genres relationship
                 program.genres = genre_objects
                 programs_to_add.append(program)
-
-        # Commit the session after processing all programs
-        session.add_all(programs_to_add)
-        session.commit()
+                
+                # Aquí pierdo eficienca por que guardo de una en una. Des esta manera asegurando qeu no haya dos programas iguales con los mismos géneros
+                # Esto pasa en programas con versión español-inglés que comparten id 
+                
+                # Commit the session after processing all programs
+                session.add_all(programs_to_add)
+                session.commit()
         print(f"Inserted {len(programs_to_add)} new programs into the database.")
