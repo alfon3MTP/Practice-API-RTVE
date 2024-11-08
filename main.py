@@ -2,7 +2,9 @@ import uvicorn
 from fastapi import FastAPI
 
 # Import Routers
-from app.routers import monitoring, rtve
+from app.rtve import router as rtve
+from app.monitoring import router as monitoring
+
 
 
 app = FastAPI(

@@ -7,11 +7,7 @@ router = APIRouter(
     tags=["System Monitor"]
 )
 
-
-memory_history = []
-disk_history = []
-
-MAX_HISTORY_SIZE = 100
+# TODO: Add async/await calls
 
 @router.get("/cpu")
 def get_cpu_usage():
@@ -34,8 +30,6 @@ def get_disk_usage():
     usage = disk.percent
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    disk_history.append({"timestamp": timestamp, "usage": usage})
-
-    return {"disk_usage_history": disk_history}
+    return {"disk_usage_history": {"timestamp": timestamp, "usage": usage}}
 
 

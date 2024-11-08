@@ -11,4 +11,8 @@ def get_session():
     with Session(engine) as session:
         yield session
         
+def get_session_hc():
+    session = Session(engine)
+    return session
+        
 init_db()
