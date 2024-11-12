@@ -26,3 +26,19 @@ Tres formatos diferentes:
 
 * Teams: Con base de datos integrada y relación, shema y moedelos separados, integracón con Alembic
     * The place to be 
+
+
+Commands: 
+
+Usar `python 3.11.8` (Última versión security)
+
+```cmd
+
+venv install -r requirements.txt
+
+alembic init alembic
+alembic revision --autogenerate -m "initial migration"
+alembic upgrade head
+
+run main.py
+```
