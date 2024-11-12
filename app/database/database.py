@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 # Conexión a MariaDB
-DATABASE_URL = "sqlite:///./teams.db"
+DATABASE_URL = "sqlite:///./database.db"
 
 engine = create_engine(DATABASE_URL, echo=True)
 
