@@ -4,7 +4,7 @@ from app.rtve.schemas import ProgramTypeEnum, ProgramAge
 from fastapi import APIRouter, HTTPException, Path, Depends
 from typing import Annotated
 from sqlmodel import select, func, Session
-from app.rtve.models import TVProgram
+from app.rtve.models import TVProgram, TVGenres, TVChannel
 
 from app.db import get_session
 
@@ -29,9 +29,7 @@ async def get_program(
     """Fetch a TV program by its ID from the RTVE API."""
     
     program = session.get(TVProgram, program_id)
-    
-    print(program)
-    
+        
     if program is None:
         raise HTTPException(status_code=404, detail='Program not found')
     return program

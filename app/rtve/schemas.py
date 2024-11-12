@@ -1,4 +1,5 @@
 from enum import Enum
+from pydantic import BaseModel
 
 class ProgramTypeEnum(str, Enum):
     serie_documental = "Serie Documental"
@@ -40,4 +41,7 @@ class ProgramAge(str, Enum):
     IF_REDAD4 = 'Recomendado para mayores de 18 años'
     IF_REDAD1 = 'Especialmente recomendado para la infancia'
     
+
+class ProgarmQuery(BaseModel):
+    name: str
     

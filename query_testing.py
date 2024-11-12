@@ -9,8 +9,7 @@ result = session.exec(select(func.count()).select_from(TVProgram))
 print("Num rows: ", result.one())
 
 
-
-
-
+result = session.exec(select(TVProgram.ageRange, TVProgram.ageRangeUid ).distinct())
+print(result.all())
 
 

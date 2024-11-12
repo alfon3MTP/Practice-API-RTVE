@@ -2,8 +2,13 @@ import uvicorn
 from fastapi import FastAPI
 
 # Import Routers
-from app.rtve import router as rtve
-from app.monitoring import router as monitoring
+from app.rtve import router as rtve_router
+from app.monitoring import router as monitoring_router
+from app.teams import router as teams_router
+
+from app.database.database import engine, Base
+Base.metadata.create_all(bind=engine)
+
 
 
 
@@ -18,8 +23,9 @@ def read_root():
     return {"message": "Hello World!"}
 
 
-app.include_router(monitoring.router)
-app.include_router(rtve.router)
+app.include_router(monitoring_router.router)
+app.include_router(rtve_router.router)
+app.include_router(teams_router.router)
 
 
 if __name__ == '__main__':
