@@ -1,55 +1,90 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.teams.shema import Team as TeamSchema, Member as MemberSchema
-from app.teams.models import Team, Member
 from app.database.database import get_db
+from app.teams import models, schema
+import app.teams.utils as tm_utils
 
 router = APIRouter(
     prefix="/teams",
     tags=["Teams"]
 )
 
-@router.get("/", response_model=list[TeamSchema])
-def get_teams(db: Session = Depends(get_db)):
-    """Fetch all teams."""
-    return db.query(Team).all()
 
-@router.post("/", response_model=TeamSchema)
-def create_team(team: TeamSchema, db: Session = Depends(get_db)):
-    """Create a new team."""
-    existing_team = db.query(Team).filter(Team.name == team.name).first()
-    if existing_team:
-        raise HTTPException(status_code=400, detail="Team already exists")
-
-    new_team = Team(name=team.name, description=team.description)
-    db.add(new_team)
+# Team Endpoints
+@router.post("/teams/", response_model=schema.Team)
+def create_team(team: schema.TeamCreate, db: Session = Depends(get_db)):
+    db_team = models.Team(name=team.name, description=team.description)
+    db.add(db_team)
     db.commit()
-    db.refresh(new_team)
-    
-    for member_data in team.members:
-        new_member = Member(name=member_data.name, role=member_data.role, team_id=new_team.id)
-        db.add(new_member)
+    db.refresh(db_team)
+    return db_team
+
+@router.get("/teams/{team_id}", response_model=schema.Team)
+def get_team(team_id: int, db: Session = Depends(get_db)):
+    team = db.query(models.Team).filter(models.Team.id == team_id).first()
+    if team is None:
+        raise HTTPException(status_code=404, detail="Team not found")
+    return team
+
+# Member Endpoints
+@router.post("/members/", response_model=schema.Member)
+def create_member(member: schema.MemberCreate, db: Session = Depends(get_db)):
+    # Create the Member
+    db_member = models.Member(name=member.name, team_id=member.team_id)
+    db.add(db_member)
+    db.commit()  # Commit the member first to get its ID
+
+    if member.inventory_items:
+        for item in member.inventory_items:
+            db_item = models.InventoryItem(name=item.name, description=item.description, member_id=db_member.id)
+            db.add(db_item)
+
+    if member.roles:
+        for role in member.roles:
+            
+            db_role = tm_utils.get_or_create_role(db, role.name)
+            db_member.roles.append(db_role)
+
+    db.commit()  
+    db.refresh(db_member) 
+
+    return db_member
+
+
+@router.get("/members/{member_id}", response_model=schema.Member)
+def get_member(member_id: int, db: Session = Depends(get_db)):
+    member = db.query(models.Member).filter(models.Member.id == member_id).first()
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return member
+
+# Inventory Item Endpoints
+@router.post("/inventory_items/", response_model=schema.InventoryItem)
+def create_inventory_item(item: schema.InventoryItemCreate, db: Session = Depends(get_db)):
+    db_item = models.InventoryItem(name=item.name, description=item.description)
+    db.add(db_item)
     db.commit()
+    db.refresh(db_item)
+    return db_item
 
-    return new_team
+@router.get("/inventory_items/{item_id}", response_model=schema.InventoryItem)
+def get_inventory_item(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(models.InventoryItem).filter(models.InventoryItem.id == item_id).first()
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
 
-@router.post("/init", response_model=dict)
-def initialize_mock_data(db: Session = Depends(get_db)):
-    """Initialize the database with mock data."""
-    sample_teams = [
-        Team(name="Team Alpha", description="An elite team of experts."),
-        Team(name="Team Beta", description="Special ops team.")
-    ]
-    db.add_all(sample_teams)
-    db.commit()
+# Role Endpoints
+@router.post("/roles/", response_model=schema.Role)
+def create_role(role: schema.RoleCreate, db: Session = Depends(get_db)):
 
-    members = [
-        Member(name="Alice", role="Leader", team_id=sample_teams[0].id),
-        Member(name="Jose", role="Technician", team_id=sample_teams[0].id),
-        Member(name="Bob", role="Manager", team_id=sample_teams[1].id),
-        Member(name="Carol", role="Programmer", team_id=sample_teams[1].id)
-    ]
-    db.add_all(members)
-    db.commit()
+    db_role = tm_utils.get_or_create_role(db, role.name)
 
-    return {"message": "Mock data initialized"}
+    return db_role
+
+@router.get("/roles/{role_id}", response_model=schema.Role)
+def get_role(role_id: int, db: Session = Depends(get_db)):
+    role = db.query(models.Role).filter(models.Role.id == role_id).first()
+    if role is None:
+        raise HTTPException(status_code=404, detail="Role not found")
+    return role
