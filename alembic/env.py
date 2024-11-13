@@ -4,6 +4,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from app.database.database import Base
 
+from app.teams.models import *
+
 from alembic import context
 
 from pathlib import Path

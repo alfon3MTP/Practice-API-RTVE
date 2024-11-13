@@ -15,6 +15,8 @@ class Team(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
+    # age = Column(Integer, nullable=True)
+    # alias = Column(String, nullable=True)
     description = Column(String)
     
     members = relationship("Member", back_populates="team")
@@ -25,6 +27,9 @@ class Member(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     team_id = Column(Integer, ForeignKey("teams.id"))
+    age = Column(Integer, nullable=True)
+    alias = Column(String, nullable=True)
+    # alias2 = Column(String, nullable=True)
     
     team = relationship("Team", back_populates="members")
     inventory_items = relationship("InventoryItem", back_populates="owner")

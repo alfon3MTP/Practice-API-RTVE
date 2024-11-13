@@ -20,6 +20,7 @@ class Team(TeamBase):
 # Member Schemas
 class MemberBase(BaseModel):
     name: str
+    age: Optional[int] = None 
     team_id: Optional[int] = None
 
 class MemberCreate(MemberBase):
