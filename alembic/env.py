@@ -5,6 +5,7 @@ from sqlalchemy import pool
 from app.database.database import Base
 
 from app.teams.models import *
+from app.rtve.models_temp import *
 
 from alembic import context
 

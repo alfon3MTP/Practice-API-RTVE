@@ -4,6 +4,12 @@ from sqlmodel import SQLModel, Field, Relationship
 from pydantic import field_validator
 from sqlalchemy import UniqueConstraint
 
+# ---- Refactor SQLModel
+
+from sqlalchemy import Column, Integer, String, ForeignKey, Table
+from sqlalchemy.orm import relationship
+from app.database.database import Base
+
 ## Pydantic Model (This is not necessary, it's just to practice)
 
 ## RTVE API Response
@@ -95,5 +101,31 @@ class TVProgram(SQLModel, table=True):
         return v
 
 
+# ---- Refactor SQLModel
 
+    # # Media details
+    # orden = Column(Integer, nullable=True)
+    # imageSEO = Column(String, nullable=True)
+    # logo = Column(String, nullable=True)
+    # thumbnail = Column(String, nullable=True)
 
+    # # Age Rating
+    # ageRangeUid = Column(String, nullable=True)
+    # ageRange = Column(String, nullable=True)
+
+    # # Program genre and completion details
+    # contentType = Column(String, nullable=True)
+    # sgce = Column(String, nullable=True)
+    # programType = Column(String, nullable=True)
+    # programTypeId = Column(Integer, nullable=True)
+    # isComplete = Column(Boolean, nullable=True)
+    # numSeasons = Column(Integer, nullable=True)
+
+    # # Team details
+    # director = Column(String, nullable=True)
+    # producedBy = Column(String, nullable=True)
+    # showMan = Column(String, nullable=True)
+    # casting = Column(String, nullable=True)
+    # technicalTeam = Column(String, nullable=True)
+
+    # idWiki = Column(String, nullable=True)
