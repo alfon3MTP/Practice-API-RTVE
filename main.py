@@ -6,11 +6,6 @@ from app.rtve import router as rtve_router
 from app.monitoring import router as monitoring_router
 from app.teams import router as teams_router
 
-from app.database.database import engine, Base
-Base.metadata.create_all(bind=engine)
-
-
-
 
 app = FastAPI(
     title="AGGREGATOR",
