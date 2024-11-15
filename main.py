@@ -9,7 +9,7 @@ from app.teams import router as teams_router
 
 app = FastAPI(
     title="AGGREGATOR",
-    description="Prueb ade Routers",
+    description="Prueba de Routers",
 )
 
 
