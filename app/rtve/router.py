@@ -4,13 +4,13 @@ from fastapi import APIRouter, HTTPException, Path, Depends
 from typing import Annotated
 from sqlalchemy.orm import Session
 from app.rtve import models, schemas
-from app.rtve.schemas import ProgramTypeEnum, ProgramAge
 from app.database.database import get_db
 
 router = APIRouter(
     prefix="/rtve",
     tags=["RTVE API"]
 )
+
 
 @router.get("/ping", summary="API Connectivity Test")
 def ping_rtve():
@@ -43,3 +43,25 @@ async def get_available_genres(
         raise HTTPException(status_code=404, detail="No genres found")
 
     return [{"id": genre.id, "name": genre.generoInf} for genre in genres]
+
+@router.get("/random_program/{genre}", summary="Get a Random Program by Genre")
+async def get_random_program(
+    genre: schemas.GenreEnum = Path(title="Genre from the Enum"),
+    db: Session = Depends(get_db)
+):
+    """Fetch a random program for the selected genre."""
+    
+    genre_record = db.query(models.Genre).filter(models.Genre.generoInf == genre.value).first()
+
+    if not genre_record:
+        raise HTTPException(status_code=404, detail=f"Genre '{genre.value}' not found")
+
+    genre_id = genre_record.id
+
+    programs = db.query(models.Program).join(models.program_genre).filter(models.program_genre.c.genre_id == genre_id).all()
+
+
+    if not programs:
+        raise HTTPException(status_code=404, detail=f"No programs found for the genre: {genre.value}")
+
+    return random.choice(programs)

@@ -33,7 +33,6 @@ class ProgramTypeEnum(str, Enum):
     informativo_diario = "Informativo diario"
     entretenimiento_no_usar = "Entretenimiento NO USAR"
     
-
 class ProgramAge(str, Enum):
     
     IF_REDAD0 = 'Recomendado para todos los públicos'
@@ -43,7 +42,37 @@ class ProgramAge(str, Enum):
     IF_REDAD6 = 'Recomendado para mayores de 16 años'
     IF_REDAD4 = 'Recomendado para mayores de 18 años'
     IF_REDAD1 = 'Especialmente recomendado para la infancia'
-    
+
+class GenreEnum(Enum):
+    VIAJES = "Viajes"
+    ARCHIVO_TVE = "Archivo TVE"
+    BIOGRAFIAS = "Biografías"
+    INFANTIL = "Infantil"
+    COCINA = "Cocina"
+    CULTURA = "Cultura"
+    CIENCIA_Y_FUTURO = "Ciencia y futuro"
+    INFORMACION_Y_ACTUALIDAD = "Información y actualidad"
+    HISTORIA = "Historia"
+    POLICIACA_Y_SUSPENSE = "Policíaca y suspense"
+    MUSICA = "Música"
+    SERVICIO_PUBLICO = "Servicio Público"
+    DRAMA = "Drama"
+    SERIES = "Series"
+    DEPORTES = "Deportes"
+    PLAYZ_JOVEN = "Playz joven"
+    HUMOR = "Humor"
+    MODA_FAMOSOS_Y_TENDENCIAS = "Moda, famosos y tendencias"
+    TERROR = "Terror"
+    SERIES_LITERARIAS = "Series Literarias"
+    CATALUNA = "Cataluña"
+    SERIES_HISTORICAS = "Series Históricas"
+    IGUALDAD = "Igualdad"
+    ACCION_Y_AVENTURAS = "Acción y aventuras"
+    COMEDIA = "Comedia"
+    TV_MOVIES = "TV Movies"
+    ROMANTICA = "Romántica"
+    SOBREMESA = "Sobremesa"
+    SERIES_EN_CATALAN = "Series en Catalán"
 
 # PubState SHCEMAS
 class PubStateBase(BaseModel):
