@@ -1,14 +1,11 @@
 import random
 
-from app.rtve.schemas import ProgramTypeEnum, ProgramAge
 from fastapi import APIRouter, HTTPException, Path, Depends
 from typing import Annotated
-from sqlmodel import select, func, Session
-from app.rtve.models import TVProgram, TVGenres, TVChannel
-
-from app.db import get_session
-
-
+from sqlalchemy.orm import Session
+from app.rtve import models, schemas
+from app.rtve.schemas import ProgramTypeEnum, ProgramAge
+from app.database.database import get_db
 
 router = APIRouter(
     prefix="/rtve",
@@ -17,94 +14,32 @@ router = APIRouter(
 
 @router.get("/ping", summary="API Connectivity Test")
 def ping_rtve():
-    #Docstring
     """Quickly test API connectivity without significant load on the system."""
     return {"message": "Welcome to RTVE Router"}
 
 @router.get('/program/{program_id}', summary="Get TV Program by ID")
 async def get_program(
     program_id: Annotated[int, Path(title="Program ID")],
-    session: Session = Depends(get_session)
-) -> TVProgram:
+    db: Session = Depends(get_db)
+) -> schemas.Program: 
     """Fetch a TV program by its ID from the RTVE API."""
     
-    program = session.get(TVProgram, program_id)
-        
-    if program is None:
-        raise HTTPException(status_code=404, detail='Program not found')
-    return program
-
-@router.get('/random_program', summary="Get a random TV Program")
-async def get_random_program(
-    session: Session = Depends(get_session)
-) -> TVProgram:
-    """Fetch a random TV program"""
-    
-    num_progrms = session.exec(
-        select(
-            func.count()
-        ).select_from(TVProgram)
-    )
-    
-    rand_id = random.randint(1, num_progrms.one())
-    
-    program = session.get(TVProgram, rand_id)
+    program = db.query(models.Program).filter(models.Program.id == program_id).first()
     
     if program is None:
         raise HTTPException(status_code=404, detail='Program not found')
+
     return program
 
 
-@router.get("/random_program_type", summary="Get a Random Program by Type")
-async def get_random_program_type(
-    program_type: ProgramTypeEnum = None,
-    age_range: ProgramAge = None,
-    session: Session = Depends(get_session)
+@router.get("/available_genres", summary="Get All Available Genres")
+async def get_available_genres(
+    db: Session = Depends(get_db)
 ):
+    """Fetch all unique genres available in the database."""
+    genres = db.query(models.Genre).all()
 
-    query = select(TVProgram)
-    
-    if program_type:
-        query = query.where(TVProgram.programType == program_type)
-    
-    print(age_range)
-    if age_range:
-        query = query.where(TVProgram.ageRangeUid == age_range)
-        
-    result = session.exec(query).all()
-    
-    if not result:
-        raise HTTPException(status_code=404, detail="No programs found")
-    
-    random_program = random.choice(result)
-    
-    return random_program
+    if not genres:
+        raise HTTPException(status_code=404, detail="No genres found")
 
-
-@router.get("/program_by_showman", summary="Find Program by Showman")
-async def find_program_by_showman(
-    showman: str, 
-    session: Session = Depends(get_session)
-):
-    result = session.exec(
-        select(TVProgram).where(TVProgram.showMan.ilike(f"%{showman}%"))
-    ).all()
-
-    if not result:
-        raise HTTPException(status_code=404, detail="No programs found for the given showman")
-
-    return result
-
-@router.get("/program_by_name", summary="Find Program by Name")
-async def find_program_by_name(
-    name: str, 
-    session: Session = Depends(get_session)
-):
-    result = session.exec(
-        select(TVProgram).where(TVProgram.name.ilike(f"%{name}%"))
-    ).all()
-
-    if not result:
-        raise HTTPException(status_code=404, detail="No programs found with the given name")
-
-    return result
+    return [{"id": genre.id, "name": genre.generoInf} for genre in genres]

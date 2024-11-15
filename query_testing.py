@@ -1,15 +1,5 @@
-from app.rtve.models import TVProgram
-from sqlmodel import select, func
-from app.db import get_session_hc
+from app.rtve.populate import save_items, delete_all_data
 
 
-session = get_session_hc()
-
-result = session.exec(select(func.count()).select_from(TVProgram))
-print("Num rows: ", result.one())
-
-
-result = session.exec(select(TVProgram.ageRange, TVProgram.ageRangeUid ).distinct())
-print(result.all())
-
-
+delete_all_data()
+save_items()
