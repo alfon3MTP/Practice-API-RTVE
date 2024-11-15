@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.database import get_db
-from app.teams import models, schema
+from app.teams import models, schemas
 import app.teams.utils as tm_utils
 
 router = APIRouter(
@@ -11,15 +11,15 @@ router = APIRouter(
 
 
 # Team Endpoints
-@router.post("/teams/", response_model=schema.Team)
-def create_team(team: schema.TeamCreate, db: Session = Depends(get_db)):
+@router.post("/teams/", response_model=schemas.Team)
+def create_team(team: schemas.TeamCreate, db: Session = Depends(get_db)):
     db_team = models.Team(name=team.name, description=team.description)
     db.add(db_team)
     db.commit()
     db.refresh(db_team)
     return db_team
 
-@router.get("/teams/{team_id}", response_model=schema.Team)
+@router.get("/teams/{team_id}", response_model=schemas.Team)
 def get_team(team_id: int, db: Session = Depends(get_db)):
     team = db.query(models.Team).filter(models.Team.id == team_id).first()
     if team is None:
@@ -27,8 +27,8 @@ def get_team(team_id: int, db: Session = Depends(get_db)):
     return team
 
 # Member Endpoints
-@router.post("/members/", response_model=schema.Member)
-def create_member(member: schema.MemberCreate, db: Session = Depends(get_db)):
+@router.post("/members/", response_model=schemas.Member)
+def create_member(member: schemas.MemberCreate, db: Session = Depends(get_db)):
     # Create the Member
     db_member = models.Member(name=member.name, team_id=member.team_id)
     db.add(db_member)
@@ -51,7 +51,7 @@ def create_member(member: schema.MemberCreate, db: Session = Depends(get_db)):
     return db_member
 
 
-@router.get("/members/{member_id}", response_model=schema.Member)
+@router.get("/members/{member_id}", response_model=schemas.Member)
 def get_member(member_id: int, db: Session = Depends(get_db)):
     member = db.query(models.Member).filter(models.Member.id == member_id).first()
     if member is None:
@@ -59,15 +59,15 @@ def get_member(member_id: int, db: Session = Depends(get_db)):
     return member
 
 # Inventory Item Endpoints
-@router.post("/inventory_items/", response_model=schema.InventoryItem)
-def create_inventory_item(item: schema.InventoryItemCreate, db: Session = Depends(get_db)):
+@router.post("/inventory_items/", response_model=schemas.InventoryItem)
+def create_inventory_item(item: schemas.InventoryItemCreate, db: Session = Depends(get_db)):
     db_item = models.InventoryItem(name=item.name, description=item.description)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
     return db_item
 
-@router.get("/inventory_items/{item_id}", response_model=schema.InventoryItem)
+@router.get("/inventory_items/{item_id}", response_model=schemas.InventoryItem)
 def get_inventory_item(item_id: int, db: Session = Depends(get_db)):
     item = db.query(models.InventoryItem).filter(models.InventoryItem.id == item_id).first()
     if item is None:
@@ -75,14 +75,14 @@ def get_inventory_item(item_id: int, db: Session = Depends(get_db)):
     return item
 
 # Role Endpoints
-@router.post("/roles/", response_model=schema.Role)
-def create_role(role: schema.RoleCreate, db: Session = Depends(get_db)):
+@router.post("/roles/", response_model=schemas.Role)
+def create_role(role: schemas.RoleCreate, db: Session = Depends(get_db)):
 
     db_role = tm_utils.get_or_create_role(db, role.name)
 
     return db_role
 
-@router.get("/roles/{role_id}", response_model=schema.Role)
+@router.get("/roles/{role_id}", response_model=schemas.Role)
 def get_role(role_id: int, db: Session = Depends(get_db)):
     role = db.query(models.Role).filter(models.Role.id == role_id).first()
     if role is None:

@@ -65,3 +65,19 @@ class Role(RoleBase):
 
     class Config:
         orm_mode = True
+
+
+# Shema response API Page
+
+class PageInfo(BaseModel):
+    number: int
+    size: int
+    offset: int
+    total: int
+    totalPages: int
+    numElements: int
+    items: List[dict]  # Adjust this to a specific schema if items have known structure
+
+class APIResponse(BaseModel):
+    page: PageInfo
+
