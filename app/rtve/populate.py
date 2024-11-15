@@ -90,10 +90,10 @@ def save_items():
         for program_data in page.items:
             save_program(db, program_data)
             
-        if page.number > 2:
-            exit()
         
-        # Fetch next page
+        # if page.number > 2:
+        #     exit()
+        
         api_response = fetch_programs(MAX_PAGE_SIZE, page.number + 1)
         page = api_response.page
         
@@ -106,6 +106,7 @@ def delete_all_data():
         db.query(models.Genre).delete()
         db.query(models.PubState).delete()
         db.query(models.Channel).delete()
+        db.query(models.program_genre).delete()
         
         db.commit()
     finally:

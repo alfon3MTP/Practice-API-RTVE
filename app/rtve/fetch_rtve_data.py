@@ -1,5 +1,5 @@
 import requests
-from app.rtve.models import * 
+from app.rtve.legacy_sql_models import * 
 
 from sqlalchemy.orm import Session
 from sqlmodel import select
